@@ -108,20 +108,20 @@ for i in range(0,10):
     #print cmd
     output0 = send_command_fm_node(ssh, cmd)
     time.sleep(1)
-    cmd = 'wget http://' + '172.28.128.3' + ':80' + '/google.com'
+    cmd = 'wget http://' + '172.28.128.7' + ':80' + '/google.com'
     send_command_fm_node(ssh, cmd)
     time.sleep(2)
     cmd = 'wget http://' + '127.0.0.1' + ':80'
     # print cmd
     output0 = send_command_fm_node(ssh, cmd)
     time.sleep(1)
-    cmd = 'wget http://' + '172.28.128.3' + ':80' + '/google.com'
+    cmd = 'wget http://' + '172.28.128.7' + ':80' + '/google.com'
     send_command_fm_node(ssh, cmd)
     time.sleep(2)
     cmd = 'wget http://' + '127.0.0.1' + ':80' + '/php'
     send_command_fm_node(ssh, cmd)
     time.sleep(3)
-    cmd = 'wget http://' + '172.28.128.3' + ':80' + '/index.html'
+    cmd = 'wget http://' + '172.28.128.7' + ':80' + '/index.html'
     send_command_fm_node(ssh, cmd)
 
 output2 = send_command_fm_node(ssh, 'ls -l')    
