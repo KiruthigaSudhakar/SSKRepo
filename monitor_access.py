@@ -2,6 +2,7 @@ import paramiko
 from scp import SCPClient
 import subprocess
 import os
+import time
 
 def connect_fm_server(ip, user, password, target_port):
     """
@@ -10,15 +11,9 @@ def connect_fm_server(ip, user, password, target_port):
     """
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    #client.connect(self.fuel_master_ip,
-    #               username=self.fuel_master_user,
-    #               password=self.fuel_master_password)
-    #target_port = 22
-    client.connect(hostname = ip,
-                   port=target_port,
-                   username = user,
-                   password = password)
+    client.connect(hostname=ip, port=target_port, username=user, password=password)
     return client
+
 
 def close_fm_server(self, client):
     """
@@ -26,6 +21,7 @@ def close_fm_server(self, client):
     :return: Returns the status
     """
     return client.close()
+
 
 def send_command_fm_node(client, command):
     """
@@ -52,46 +48,38 @@ def send_command_fm_node(client, command):
                     # Print data from stdout
                     logger.info(stdout.channel.recv(1024))'''
     else:
-         print("Connection to fuel master not opened.")
+        print("Connection to fuel master not opened.")
 
-    def scp_file_to_remote(self, client, source, destination):
-        """
-        To transfer files via scp from one machine to remote.
-        :return: Returns the status
-        """
-        scp = SCPClient(client.get_transport())
-        scp.put(source, destination)
-
-    def replace_file_content(self, infile, outfile, oldvalue, newvalue):
-
-        """
-        To replace the contents of one file to another
-        # Change the file content
-        # filein = "resources/config_file.txt"
-        # fileout = "resources/config_sample.txt"
-        :return: Returns the status
-        """
-        f = open(infile, 'r')
-        filedata = f.read()
-        f.close()
-
-        newdata = filedata.replace(oldvalue, newvalue)
-
-        f = open(outfile, 'w')
-        f.write(newdata)
-        f.close()
 
 def get_vm_ip():
     # Get list of running vms
-    val = subprocess.Popen(["VBoxManage","list","runningvms"], shell=True, stdout=subprocess.PIPE)
+    val = subprocess.Popen(["VBoxManage", "list", "runningvms"], shell=True, stdout=subprocess.PIPE)
+    print val
     vm_list = val.communicate()[0]
-
+    print vm_list
     vm_id = vm_list.split("\"")[1].split("\"")[0]
     print("The VM id is : \n" + vm_id)
 
     # Get the ip address of the running vm
-    cmd = "VBoxManage guestproperty get " + vm_id + " \"/VirtualBox/GuestInfo/Net/1/V4/IP\" "
-    val = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+    cmd1 = "VBoxManage guestproperty get " + vm_id + " \"/VirtualBox/GuestInfo/Net/1/V4/IP\" "
+    val = subprocess.Popen(cmd1, shell=True, stdout=subprocess.PIPE)
+    ip_list = val.communicate()[0]
+    print("The IP of the Running VM is : " + ip_list.split("Value: ")[1].strip())
+    return ip_list.split("Value: ")[1].strip()
+
+
+def get_vm_ip1():
+    # Get list of running vms
+    # val = subprocess.Popen(["VBoxManage","list","runningvms"], shell=True, stdout=subprocess.PIPE)
+    val = os.popen("VBoxManage list runningvms").readlines()
+    print val
+    vm_list = val[0]
+    vm_id = vm_list.split("\"")[1].split("\"")[0]
+    print("The VM id is : \n" + vm_id)
+
+    # Get the ip address of the running vm
+    cmd0 = "VBoxManage guestproperty get " + vm_id + " \"/VirtualBox/GuestInfo/Net/1/V4/IP\" "
+    val = subprocess.Popen(cmd0, shell=True, stdout=subprocess.PIPE)
     ip_list = val.communicate()[0]
     print("The IP of the Running VM is : " + ip_list.split("Value: ")[1].strip())
     return ip_list.split("Value: ")[1].strip()
@@ -102,32 +90,41 @@ def trigger_webserver1():
     print v0
     file = '\"C:\Program Files\Oracle\VirtualBox\VBoxManage.exe\" list runningvms'
     print file
-    #v1 = os.system(file)
-    #print v1
-    #v2 = os.system("dir")
-    #print v2
     v = os.popen("VBoxManage list runningvms").readlines()
-    #x = v.split("{")[1].split("}")[0]
     print v
 
-#trigger_webserver1()
-ip = get_vm_ip()
+pathlist = "C:\Program Files\Oracle\VirtualBox"
 vm_username = 'vagrant'
 vm_password = 'vagrant'
 ssh_default_port = 22
-#ssh = connect_fm_server('127.0.0.1', 'vagrant', 'vagrant', 2222)
-ssh = connect_fm_server(ip.strip(), vm_username, vm_password, ssh_default_port)
-# move to home directory
+ssh = connect_fm_server('127.0.0.1', 'vagrant', 'vagrant', 2202)
 output = send_command_fm_node(ssh, 'cd /home/vagrant')
 # Remove any existing index files
 output = send_command_fm_node(ssh, 'rm index.html*')
 print output
-# Iss
-cmd = 'wget http://' + ip + ':80'
-print cmd
-output0 = send_command_fm_node(ssh, cmd)
-output1 = send_command_fm_node(ssh, 'ls -l')
+# Is
+for i in range(0,10):
+    cmd = 'wget http://' + '127.0.0.1' + ':80'
+    #print cmd
+    output0 = send_command_fm_node(ssh, cmd)
+    time.sleep(1)
+    cmd = 'wget http://' + '172.28.128.3' + ':80' + '/google.com'
+    send_command_fm_node(ssh, cmd)
+    time.sleep(2)
+    cmd = 'wget http://' + '127.0.0.1' + ':80'
+    # print cmd
+    output0 = send_command_fm_node(ssh, cmd)
+    time.sleep(1)
+    cmd = 'wget http://' + '172.28.128.3' + ':80' + '/google.com'
+    send_command_fm_node(ssh, cmd)
+    time.sleep(2)
+    cmd = 'wget http://' + '127.0.0.1' + ':80' + '/php'
+    send_command_fm_node(ssh, cmd)
+    time.sleep(3)
+    cmd = 'wget http://' + '172.28.128.3' + ':80' + '/index.html'
+    send_command_fm_node(ssh, cmd)
 
-print output0
-print output1
+output2 = send_command_fm_node(ssh, 'ls -l')    
+output = send_command_fm_node(ssh, 'rm index.html*')
+
 
