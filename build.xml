@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+   <project name="nginxMonitor" default="info">
+   
+   <target name="info">
+      <echo>Hello World - Welcome to Apache Ant!</echo>
+	  <exec dir="" executable="python" failonerror="true">
+		<arg line="monitor_access.py" />
+	  </exec>	  	  
+   </target>
+   
+</project>
